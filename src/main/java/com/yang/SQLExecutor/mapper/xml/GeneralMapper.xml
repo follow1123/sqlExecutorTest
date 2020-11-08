@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yang.SQLExecutor.mapper.GeneralMapper">
+    <select id="select" resultType="map">
+            ${sql}
+<!--        select-->
+<!--        <if test="selectParam != null">${selectParam}</if>-->
+<!--        from ${tableName}-->
+<!--        <if test="whereParam != null">-->
+<!--            where ${whereParam}-->
+<!--        </if>-->
+<!--        <if test="orderParam != null">-->
+<!--            order by ${orderParam}-->
+<!--        </if>-->
+    </select>
+<!--    <insert id="insert">-->
+<!--        insert into ${tableName}-->
+<!--        <if test="colNames != null">-->
+<!--            ${colNames}-->
+<!--        </if>-->
+<!--        values-->
+<!--        <if test="values != null">-->
+<!--            ${values}-->
+<!--        </if>-->
+<!--    </insert>-->
+
+<!--    <update id="update">-->
+<!--        update ${tableName}-->
+<!--        set ${setParam}-->
+<!--        <if test="whereParam != null">-->
+<!--            where ${whereParam}-->
+<!--        </if>-->
+
+<!--    </update>-->
+</mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <bean name="insert" class="com.yang.SQLExecutor.core.sql.sqlInterface.impl.InsertImpl">
+        <constructor-arg name="generalMapper" ref="generalMapper"/>
+    </bean>
+    <bean name="update" class="com.yang.SQLExecutor.core.sql.sqlInterface.impl.UpdateImpl">
+        <constructor-arg name="generalMapper" ref="generalMapper"/>
+    </bean>
+    <bean name="delete" class="com.yang.SQLExecutor.core.sql.sqlInterface.impl.DeleteImpl">
+        <constructor-arg name="generalMapper" ref="generalMapper"/>
+    </bean>
+    <bean name="select" class="com.yang.SQLExecutor.core.sql.sqlInterface.impl.SelectImpl">
+        <constructor-arg name="generalMapper" ref="generalMapper"/>
+    </bean>
+    <bean name="sql" class="com.yang.SQLExecutor.core.sql.SQL">
+        <constructor-arg name="delete" ref="delete"/>
+        <constructor-arg name="update" ref="update"/>
+        <constructor-arg name="insert" ref="insert"/>
+        <constructor-arg name="select" ref="select"/>
+    </bean>
+</beans>
