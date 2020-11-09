@@ -1,10 +1,10 @@
 package com.yang.SQLExecutor.util;
 
-import com.sun.istack.internal.NotNull;
-import com.yang.SQLExecutor.core.param.operator.SelectOperator;
-import com.yang.SQLExecutor.core.param.operator.WhereOperator;
+import com.yang.SQLExecutor.util.stringTemplate.STemplate;
+import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +19,7 @@ public class SQLStringUtils {
     public static String insertInto = "insert into ";
 
     public static String deleteFrom = "delete from ";
+
     public static String from = " from ";
 
     public static String topOfKeyTab = "`";
@@ -32,6 +33,8 @@ public class SQLStringUtils {
     public static String key_selectParam = "selectParam";
     public static String key_colNames = "colNames";
     public static String key_values = "values";
+
+    private static String selectTemplate = "select @{selectParam:(@{v}).j(, )} from `@{tableName}` @{whereParam:(@{v}).f(where ).j( and )}";
 
     public static String set = " set ";
     public static String and = " and ";
@@ -301,8 +304,8 @@ public class SQLStringUtils {
      * @param str
      * @return
      */
-    private static String nullToEmpty(String str) {
-        return str == null ? "" : str;
+    private static String nullToEmpty(Object str) {
+        return str == null ? "" : str.toString();
     }
 
     /**
@@ -322,7 +325,7 @@ public class SQLStringUtils {
      * @param sqlMap
      * @return
      */
-    public static String buildInsert(Map<String, String> sqlMap) {
+    public static String buildInsert(Map<String, Object> sqlMap) {
         String tableName = nullToEmpty(sqlMap.get(key_tableName));
         String colNames = nullToEmpty(sqlMap.get(key_colNames));
         String values = nullToEmpty(sqlMap.get(key_values));
@@ -337,7 +340,7 @@ public class SQLStringUtils {
      * @param sqlMap
      * @return
      */
-    public static String buildUpdate(Map<String, String> sqlMap) {
+    public static String buildUpdate(Map<String, Object> sqlMap) {
         String tableName = nullToEmpty(sqlMap.get(key_tableName));
         String setParam = nullToEmpty(sqlMap.get(key_setParam));
         String whereParam = nullToEmpty(sqlMap.get(key_whereParam));
@@ -355,7 +358,7 @@ public class SQLStringUtils {
      * @param sqlMap
      * @return
      */
-    public static String buildDelete(Map<String, String> sqlMap) {
+    public static String buildDelete(Map<String, Object> sqlMap) {
         String tableName = nullToEmpty(sqlMap.get(key_tableName));
         String whereParam = nullToEmpty(sqlMap.get(key_whereParam));
         sb.append(deleteFrom).append(empty).append(tableName).append(empty)
@@ -369,17 +372,38 @@ public class SQLStringUtils {
      * @param sqlMap
      * @return
      */
-    public static String buildSelect(Map<String, String> sqlMap) {
-        String whereParam = nullToEmpty(sqlMap.get(key_whereParam));
-        String tableName = nullToEmpty(sqlMap.get(key_tableName));
-        String selectParam;
-        if ((selectParam = sqlMap.get(key_selectParam)) == null) {
-            selectParam = all;
-        }
-        sb.append(select).append(selectParam).append(empty)
-                .append(from).append(tableName).append(empty)
-                .append(whereParam);
-        return value();
+    public static String buildSelect(Map<String, Object> sqlMap) {
+        String render = STemplate.render(selectTemplate, sqlMap);
+        return render;
+    }
+    @Test
+    public void test01(){
+        HashMap<String, Object> hashMap = new HashMap<String, Object>() {
+            {
+                put("tableName", "city");
+                put("selectParam", Arrays.asList("*"));
+                put("whereParam", Arrays.asList("CityName = 'Beijing'", "CityCode = 'PEK'"));
+            }
+        };
+        System.out.println(buildSelect(hashMap));
     }
 
+    @Test
+    public void test02(){
+       String sql = "@{column} @{ope} '@{value}'";
+        HashMap<String, Object> hashMap = new HashMap<String, Object>() {
+            {
+                put("column", "CityName");
+                put("ope", "=");
+                put("value", "Beijing");
+            }
+        };
+        TimeTest.testTime(()->{
+
+        System.out.println(STemplate.render(sql, hashMap));
+       });
+        TimeTest.testTime(()->{
+            System.out.println(insertSymbol("=", "CityName", "Beijing"));
+        });
+    }
 }

@@ -20,7 +20,7 @@ public class STemplate {
     //匹配集合的正则表达式
     private static Pattern collectionReg = Pattern.compile("@\\{(\\w+):\\(([\\w =@\\{}',-]+)\\)([\\.\\w '\\(\\);,:]+)}");
     //匹配集合内前缀后缀的正则
-    private static Pattern collectionArgReg = Pattern.compile("\\.([jlf])\\('([\\w ;,:\\)\\(]+)'\\)");
+    private static Pattern collectionArgReg = Pattern.compile("\\.([jlf])\\(([\\w ;,:\\)\\(]+)\\)");
 
     //StringBuilder
     private static StringBuilder sb = new StringBuilder();
@@ -126,8 +126,7 @@ public class STemplate {
             putListValue(i, values.get(i));
             sb.append(renderString(target, tempMap)).append(join);
         }
-        replace(join.length());
-        sb.append(last);
+        replace(join.length(), last);
         clearMap();
         return value();
     }
@@ -147,8 +146,7 @@ public class STemplate {
             putMapValue(k, v);
             sb.append(renderString(target, tempMap)).append(join);
         });
-        replace(join.length());
-        sb.append(last);
+        replace(join.length(), last);
         clearMap();
         return value();
     }

@@ -17,7 +17,7 @@ import static com.yang.SQLExecutor.util.SQLStringUtils.*;
  */
 public class BaseSQLImpl {
 
-    private Map<String, String> sqlMap;
+    private Map<String, Object> sqlMap;
 
     private List<String> values;
 
@@ -69,9 +69,11 @@ public class BaseSQLImpl {
     protected String buildDelete(){
         return SQLStringUtils.buildDelete(sqlMap);
     }
+
     protected String buildUpdate(){
         return SQLStringUtils.buildUpdate(sqlMap);
     }
+
     protected String buildSelect(){
         return SQLStringUtils.buildSelect(sqlMap);
     }

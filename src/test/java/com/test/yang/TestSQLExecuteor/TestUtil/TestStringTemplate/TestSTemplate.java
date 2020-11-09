@@ -123,7 +123,7 @@ public class TestSTemplate {
 
     @Test
     public void test08() {
-        String str = "select @{sp:(@{v}).j(', ')} from `@{fp}` @{wp:(@{k} = '@{v}').f('where ').j(' and ')}";
+        String str = "select @{sp:(@{v}).j(, )} from `@{fp}` @{wp:(@{k} = '@{v}').f(where ).j( and )}";
         HashMap<String, Object> hashMap = new HashMap<String, Object>() {
             {
                 put("sp", Arrays.asList("CityName", "CityCode"));
@@ -143,13 +143,13 @@ public class TestSTemplate {
     }
 
     @Test
-    public void test09(){
-       String sqlTemplate = "update `@{tableName}` @{sp:(@{k} = '@{v}').j(', ').f('set ')} @{wp:(@{k} = '@{v}').j(' and ').f('where ')}";
+    public void test09() {
+        String sqlTemplate = "update `@{tableName}` @{sp:(@{k} = '@{v}').j(', ').f('set ')} @{wp:(@{k} = '@{v}').j(' and ').f('where ')}";
 
         HashMap<String, Object> hashMap = new HashMap<String, Object>() {
             {
                 put("tableName", "city");
-                put("sp", new HashMap<String, Object>(){{
+                put("sp", new HashMap<String, Object>() {{
                     put("CityName", "BJ");
                 }});
 
@@ -166,8 +166,8 @@ public class TestSTemplate {
     }
 
     @Test
-    public void test10(){
-       String sql = "insert into `@{tableName}` @{colNames:(@{v}).f(' (').l(') ').j(', ')} values @{values:('@{v}').f(' (').l(') ').j(', ')}";
+    public void test10() {
+        String sql = "insert into `@{tableName}` @{colNames:(@{v}).f( ().l() ).j(, )} values @{values:('@{v}').f( ().l() ).j(, )}";
 
         HashMap<String, Object> hashMap = new HashMap<String, Object>() {
             {
@@ -183,8 +183,8 @@ public class TestSTemplate {
     }
 
     @Test
-    public void test11(){
-           String str ="@{map}.for(@{v1}.for(@{k2} @{k1} @{v2}.j(12))).j(1).f(j)";
+    public void test11() {
+        String str = "@{map}.for(@{v1}.for(@{k2} @{k1} @{v2}.j(12))).j(1).f(j)";
         HashMap<String, Object> hashMap = new HashMap<String, Object>() {
             {
                 put("name", "city");

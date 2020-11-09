@@ -43,11 +43,6 @@ public class SelectImpl extends SimpleSelect {
         return this;
     }
 
-//    @Override
-//    public Select order(OrderByParam o) {
-//        return this;
-//    }
-
     @Override
     public <T> List<T> executeQuery(Class<T> tClass) {
         return super.executeQuery(tClass);
