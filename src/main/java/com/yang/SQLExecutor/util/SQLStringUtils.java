@@ -15,18 +15,18 @@ import java.util.Map;
 public class SQLStringUtils {
 
     public static String select = "select ";
-
-    public static String insertInto = "insert into ";
-
-    public static String deleteFrom = "delete from ";
-
     public static String from = " from ";
-
-    public static String topOfKeyTab = "`";
-
-    public static String sqlValue = " values ";
-
     public static String update = "update ";
+    public static String insertInto = "insert into ";
+    public static String deleteFrom = "delete from ";
+    public static String topOfKeyTab = "`";
+    public static String values = " values ";
+
+
+
+
+
+
     public static String key_tableName = "tableName";
     public static String key_setParam = "setParam";
     public static String key_whereParam = "whereParam";

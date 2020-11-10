@@ -44,3 +44,22 @@ StringBuilder进行字符串拼接但这样拼接显得格外麻烦，所以我�
 代替StringBuilder的字符串拼接，我又要想办法将这两个方式融合，我现在就困在了这里，完全陷入了这个字符串拼接游戏内，而核心的功能都没实现
 所以我必须要来跳出来看一看，我要根据我最初要实现的功再做分析。
   
+### 2020-11-10:
+* 今天思考了一下，因为模板引擎的功能不完善而且连拼接字符串的效率远低于StringBuilder就不用了，这个模板引擎的基础功能已经实现了，就算是
+复习了下正则的语法，之间那个SQLStringUtil里面拼接字符串的方法太杂了，所以编写了一个StringUtil工具，将最基础的几个方法编写在这里，SQL
+StringUtil就重写，重写了几个方法后发现我写的代码内有一类代码很冗余又很难分离，就是使用instanceof关键字时，如果匹配的话还要强转，所以
+就写了个instanceof工具类，我真是工具狂魔，语法如下：
+```java
+    Instanceof ele = Instanceof.ele("123");
+
+    ele.is(String.class, s -> {
+        System.out.println("String => " + s);
+    }).isArray(a -> {
+        System.out.println("Array => " + a);
+    }).isList(l -> {
+        System.out.println("List => " + l);
+    }).other(o -> {
+        System.out.println("other => " + o);
+    });
+```
+* 具体实现在那个类里的每个方法都有说明，今天收获很多。

@@ -2,6 +2,7 @@ package com.yang.SQLExecutor.core.sql.sqlInterface.impl;
 
 import com.yang.SQLExecutor.core.sql.sqlInterface.Insert;
 import com.yang.SQLExecutor.mapper.GeneralMapper;
+import com.yang.SQLExecutor.util.SQLStringUtils;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -76,7 +77,7 @@ public class InsertImpl extends BaseSQLImpl implements Insert {
      */
     @Override
     public Insert values(List<String> values) {
-        putValues(insertEmpty(sqlValue, wrappedInBrackets(values)));
+        putValues(insertEmpty(SQLStringUtils.values, wrappedInBrackets(values)));
         return this;
     }
 
