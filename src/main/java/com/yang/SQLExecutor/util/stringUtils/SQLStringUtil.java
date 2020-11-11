@@ -53,34 +53,57 @@ public class SQLStringUtil {
     public static String empty = " ";
     public static String single = "'";
 
-//    private static String listVer(Object)
+
+    public static String condition(String colName, String operator, Object value) {
+        Instanceof ele = Instanceof.ele(value);
+        ele.isStr(s -> {
+            if (like.equals(operator)) {
+                s = wrap(percent, s);
+            }
+            return wrap(single, s);
+        });
+        if (in.equals(operator) || notIn.equals(operator)) {
+            ele.isList(l -> {
+                for (int i = 0; i < l.size(); i++) {
+                    l.set(i, wrap(single, l.get(i)));
+                }
+                return wrap(lParentheses, rParentheses, join(comma, l));
+            }).isArray(a -> {
+                for (int i = 0; i < a.length; i++) {
+                    a[i] = wrap(single, a[i]);
+                }
+                return wrap(lParentheses, rParentheses, join(comma, Arrays.asList(a)));
+            });
+        }
+
+        String result = ele.other(o -> "").result().toString();
+
+        sb.append(colName).append(operator).append(result);
+        return result();
+    }
+
+    @Test
+    public void test04() {
+        System.out.println(condition("CityName", notIn, Arrays.asList("B", "C", "D")));
+    }
 
     public static String buildSelect(Map<String, Object> params) {
-        String selectP, tableName, whereP = "";
-        Object temp = params.get(key_selectParam);
-        Instanceof ele = Instanceof.ele(temp);
-        ele.isList(l -> {
+        String selectP, whereP;
 
-        }).isArray(a -> {
+        Instanceof ele = Instanceof.ele(params.get(key_selectParam));
 
-        }).isNull(e -> {
+        selectP = ele.isList(l -> join(comma, l))
+                .isArray(a -> join(comma, Arrays.asList(a)))
+                .isNull(e -> all)
+                .other(o -> "")
+                .result(String.class);
 
-        });
-        if (temp instanceof List) {
-            selectP = join(comma, (List<Object>) temp);
-        } else if (temp instanceof String[]) {
-            selectP = join(comma, Arrays.asList(temp));
-        } else if (temp == null) {
-            selectP = all;
-        } else {
-            throw new RuntimeException("select parameter not match!");
-        }
-        temp = params.get(key_whereParam);
-        if (temp instanceof List) {
-            whereP = join(and, (List<Object>) temp);
-        } else if (temp instanceof String[]) {
-            whereP = join(and, Arrays.asList(temp));
-        }
+        whereP = ele.reset(params.get(key_whereParam))
+                .isList(l -> join(and, l))
+                .isArray(a -> join(and, Arrays.asList(a)))
+                .other(o -> "")
+                .result(String.class);
+
         sb.append(select).append(selectP).append(from).append(topOfKeyTab)
                 .append(n2e(params.get(key_tableName))).append(topOfKeyTab)
                 .append(prefix(where, whereP));
@@ -92,9 +115,9 @@ public class SQLStringUtil {
     public void test01() {
         HashMap<String, Object> hashMap = new HashMap<String, Object>() {
             {
-                put(key_selectParam, Arrays.asList("1", "", "3"));
+//                put(key_selectParam, Arrays.asList("1", "", "3"));
                 put(key_tableName, "231");
-                put(key_whereParam, "  ");
+                put(key_whereParam, Arrays.asList("4354", "43", "123", "123"));
             }
         };
         System.out.println(buildSelect(hashMap));
@@ -115,16 +138,17 @@ public class SQLStringUtil {
 
     @Test
     public void test03() {
-        Instanceof ele = Instanceof.ele("123");
-        ele.is(String.class, s -> {
-            System.out.println("String => " + s);
-        }).isArray(a -> {
-            System.out.println("Array => " + a);
-        }).isList(l -> {
-            System.out.println("List => " + l);
-        }).other(o -> {
-            System.out.println("other => " + o);
-        });
+
+//        Instanceof ele = Instanceof.ele("123");
+//        Object other = ele.is(String.class, s -> {
+//            System.out.println("String => " + s);
+//        }).isArray(a -> {
+//            System.out.println("Array => " + a);
+//        }).isList(l -> {
+//            System.out.println("List => " + l);
+//        }).other(o -> {
+//            System.out.println("other => " + o);
+//        });
     }
 
 

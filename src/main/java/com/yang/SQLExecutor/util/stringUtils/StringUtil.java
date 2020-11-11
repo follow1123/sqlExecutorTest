@@ -80,15 +80,15 @@ public class StringUtil {
     /**
      * 使用两个符号包裹一个对象
      *
-     * @param symbol1
-     * @param symbol2
+     * @param symbolStart
+     * @param symbolEnd
      * @param target
      * @return
      */
-    public static String wrap(String symbol1, String symbol2, Object target) {
+    public static String wrap(String symbolStart, String symbolEnd, Object target) {
         String cur;
         if (!"".equals(cur = n2e(target))) {
-            sb.append(n2e(symbol1)).append(cur).append(n2e(symbol2));
+            sb.append(n2e(symbolStart)).append(cur).append(n2e(symbolEnd));
         }
         return result();
     }
