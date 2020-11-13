@@ -53,15 +53,25 @@ public class SQLStringUtil {
     public static String empty = " ";
     public static String single = "'";
 
+    /**
+     * 根据不同的关键字拼接条件语句
+     *
+     * @param colName
+     * @param operator
+     * @param value
+     * @return
+     */
+    public static String condition(String colName, String operator, String value) {
 
-    public static String condition(String colName, String operator, Object value) {
         Instanceof ele = Instanceof.ele(value);
+
         ele.isStr(s -> {
             if (like.equals(operator)) {
                 s = wrap(percent, s);
             }
             return wrap(single, s);
         });
+
         if (in.equals(operator) || notIn.equals(operator)) {
             ele.isList(l -> {
                 for (int i = 0; i < l.size(); i++) {
@@ -77,17 +87,19 @@ public class SQLStringUtil {
         }
 
         String result = ele.other(o -> "").result().toString();
-
-        sb.append(colName).append(operator).append(result);
+        if (!"".equals(result)) {
+            sb.append(colName).append(operator).append(result);
+        }
         return result();
     }
 
-    @Test
-    public void test04() {
-        System.out.println(condition("CityName", notIn, Arrays.asList("B", "C", "D")));
-    }
-
-    public static String buildSelect(Map<String, Object> params) {
+    /**
+     * 拼接一个select语句
+     *
+     * @param params
+     * @return
+     */
+    public static String buildSelect(Map<String, String> params) {
         String selectP, whereP;
 
         Instanceof ele = Instanceof.ele(params.get(key_selectParam));
@@ -111,45 +123,16 @@ public class SQLStringUtil {
         return result();
     }
 
-    @Test
-    public void test01() {
-        HashMap<String, Object> hashMap = new HashMap<String, Object>() {
-            {
-//                put(key_selectParam, Arrays.asList("1", "", "3"));
-                put(key_tableName, "231");
-                put(key_whereParam, Arrays.asList("4354", "43", "123", "123"));
-            }
-        };
-        System.out.println(buildSelect(hashMap));
+    public static String buildSelectParam(List<String> colNames) {
+        return join(comma, colNames);
     }
 
-    @Test
-    public void test02() {
-        Class<? extends String> aClass = "123".getClass();
-        Class<String> stringClass = String.class;
-        System.out.println(aClass);
-        System.out.println(stringClass);
-        System.out.println(aClass.equals(stringClass));
-//        Class<? extends CityTable> aClass1 = TableOperator.city.getClass();
-//        Class<City> cityClass = City.class;
-//        System.out.println(aClass1);
-//        System.out.println(cityClass);
+    public static String buildSelectParam(List<String> colNames, List<String> labels) {
+        if (colNames == null || labels == null) return "";
+        if (colNames.size() != labels.size()) return "";
+        for (int i = 0; i < colNames.size(); i++) {
+            colNames.set(i, insert(empty, n2et(colNames.get(i)), n2et(labels.get(i))));
+        }
+        return join(comma, colNames);
     }
-
-    @Test
-    public void test03() {
-
-//        Instanceof ele = Instanceof.ele("123");
-//        Object other = ele.is(String.class, s -> {
-//            System.out.println("String => " + s);
-//        }).isArray(a -> {
-//            System.out.println("Array => " + a);
-//        }).isList(l -> {
-//            System.out.println("List => " + l);
-//        }).other(o -> {
-//            System.out.println("other => " + o);
-//        });
-    }
-
-
 }

@@ -106,6 +106,7 @@ public abstract class SimpleSelect extends BaseSQLImpl implements Select {
         }
         return t;
     }
+
     @Override
     public List<Map<String, Object>> executeQuery() {
         return generalMapper.select(buildSelect());

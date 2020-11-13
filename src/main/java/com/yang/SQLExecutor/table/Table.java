@@ -17,7 +17,7 @@ public class Table {
         this.colNames = Arrays.asList(colNames);
     }
 
-    private boolean have(String colName){
+    public boolean have(String colName){
         return colNames.contains(colName);
     }
 

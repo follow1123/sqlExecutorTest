@@ -18,7 +18,7 @@ public class StringUtil {
      * @param lastLength
      * @param str
      */
-    public static void replace(int lastLength, Object str) {
+    public static void replace(int lastLength, String str) {
         sb.replace(sb.length() - lastLength, sb.length(), n2e(str));
     }
 
@@ -37,8 +37,18 @@ public class StringUtil {
      * @param str
      * @return
      */
-    public static String n2e(Object str) {
-        return str == null ? "" : str.toString();
+    public static String n2e(String str) {
+        return str == null ? "" : str;
+    }
+
+    /**
+     * 判断是否为null是则返回空串并去除前后空格
+     *
+     * @param str
+     * @return
+     */
+    public static String n2et(String str) {
+        return n2e(str).trim();
     }
 
     /**
@@ -66,15 +76,19 @@ public class StringUtil {
      * @param strings
      * @return
      */
-    public static String join(String symbol, List<Object> strings) {
+    public static String join(String symbol, List<String> strings) {
         String[] cur = new String[1];
         strings.forEach(v -> {
-            if (!"".equals(cur[0] = n2e(v))) {
+            if (!"".equals(cur[0] = n2et(v))) {
                 sb.append(cur[0]).append(symbol);
             }
         });
         replace(symbol.length());
         return result();
+    }
+
+    public static String insert(String symbol, String left, String right) {
+        return join(symbol, Arrays.asList(left, right));
     }
 
     /**
@@ -85,13 +99,14 @@ public class StringUtil {
      * @param target
      * @return
      */
-    public static String wrap(String symbolStart, String symbolEnd, Object target) {
+    public static String wrap(String symbolStart, String symbolEnd, String target) {
         String cur;
-        if (!"".equals(cur = n2e(target))) {
+        if (!"".equals(cur = n2et(target))) {
             sb.append(n2e(symbolStart)).append(cur).append(n2e(symbolEnd));
         }
         return result();
     }
+
     /**
      * 使用一个符号包裹一个对象
      *
@@ -99,7 +114,7 @@ public class StringUtil {
      * @param target
      * @return
      */
-    public static String wrap(String symbol, Object target) {
+    public static String wrap(String symbol, String target) {
         return wrap(symbol, symbol, target);
     }
 
@@ -110,7 +125,7 @@ public class StringUtil {
      * @param target
      * @return
      */
-    public static String prefix(String symbol, Object target) {
+    public static String prefix(String symbol, String target) {
         return wrap(symbol, null, target);
     }
 
@@ -121,7 +136,7 @@ public class StringUtil {
      * @param target
      * @return
      */
-    public static String suffix(String symbol, Object target) {
+    public static String suffix(String symbol, String target) {
         return wrap(null, symbol, target);
     }
 
