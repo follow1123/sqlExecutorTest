@@ -62,34 +62,33 @@ public class SQLStringUtil {
      * @return
      */
     public static String condition(String colName, String operator, String value) {
-
-        Instanceof ele = Instanceof.ele(value);
-
-        ele.isStr(s -> {
-            if (like.equals(operator)) {
-                s = wrap(percent, s);
-            }
-            return wrap(single, s);
-        });
-
-        if (in.equals(operator) || notIn.equals(operator)) {
-            ele.isList(l -> {
-                for (int i = 0; i < l.size(); i++) {
-                    l.set(i, wrap(single, l.get(i)));
-                }
-                return wrap(lParentheses, rParentheses, join(comma, l));
-            }).isArray(a -> {
-                for (int i = 0; i < a.length; i++) {
-                    a[i] = wrap(single, a[i]);
-                }
-                return wrap(lParentheses, rParentheses, join(comma, Arrays.asList(a)));
-            });
-        }
-
-        String result = ele.other(o -> "").result().toString();
-        if (!"".equals(result)) {
-            sb.append(colName).append(operator).append(result);
-        }
+//        Instanceof ele = Instanceof.ele(value);
+//
+//        ele.isStr(s -> {
+//            if (like.equals(operator)) {
+//                s = wrap(percent, s);
+//            }
+//            return wrap(single, s);
+//        });
+//
+//        if (in.equals(operator) || notIn.equals(operator)) {
+//            ele.isList(l -> {
+//                for (int i = 0; i < l.size(); i++) {
+//                    l.set(i, wrap(single, l.get(i)));
+//                }
+//                return wrap(lParentheses, rParentheses, join(comma, l));
+//            }).isArray(a -> {
+//                for (int i = 0; i < a.length; i++) {
+//                    a[i] = wrap(single, a[i]);
+//                }
+//                return wrap(lParentheses, rParentheses, join(comma, Arrays.asList(a)));
+//            });
+//        }
+//
+//        String result = ele.other(o -> "").result().toString();
+//        if (!"".equals(result)) {
+//            sb.append(colName).append(operator).append(result);
+//        }
         return result();
     }
 
@@ -100,25 +99,25 @@ public class SQLStringUtil {
      * @return
      */
     public static String buildSelect(Map<String, String> params) {
-        String selectP, whereP;
-
-        Instanceof ele = Instanceof.ele(params.get(key_selectParam));
-
-        selectP = ele.isList(l -> join(comma, l))
-                .isArray(a -> join(comma, Arrays.asList(a)))
-                .isNull(e -> all)
-                .other(o -> "")
-                .result(String.class);
-
-        whereP = ele.reset(params.get(key_whereParam))
-                .isList(l -> join(and, l))
-                .isArray(a -> join(and, Arrays.asList(a)))
-                .other(o -> "")
-                .result(String.class);
-
-        sb.append(select).append(selectP).append(from).append(topOfKeyTab)
-                .append(n2e(params.get(key_tableName))).append(topOfKeyTab)
-                .append(prefix(where, whereP));
+//        String selectP, whereP;
+//
+//        Instanceof ele = Instanceof.ele(params.get(key_selectParam));
+//
+//        selectP = ele.isList(l -> join(comma, l))
+//                .isArray(a -> join(comma, Arrays.asList(a)))
+//                .isNull(e -> all)
+//                .other(o -> "")
+//                .result(String.class);
+//
+//        whereP = ele.reset(params.get(key_whereParam))
+//                .isList(l -> join(and, l))
+//                .isArray(a -> join(and, Arrays.asList(a)))
+//                .other(o -> "")
+//                .result(String.class);
+//
+//        sb.append(select).append(selectP).append(from).append(topOfKeyTab)
+//                .append(n2e(params.get(key_tableName))).append(topOfKeyTab)
+//                .append(prefix(where, whereP));
 
         return result();
     }
