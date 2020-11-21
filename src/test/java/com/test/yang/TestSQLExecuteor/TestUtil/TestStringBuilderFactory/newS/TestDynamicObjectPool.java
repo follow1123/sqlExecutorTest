@@ -1,27 +1,28 @@
-package com.test.yang.TestSQLExecuteor.TestUtil.TestStringBuilderFactory;
+package com.test.yang.TestSQLExecuteor.TestUtil.TestStringBuilderFactory.newS;
 
 import com.yang.SQLExecutor.util.TimeTest;
-import com.yang.SQLExecutor.util.stringUtils.test.StringBuilderAdapter;
+import com.yang.SQLExecutor.util.stringUtils.test.newStructure.Reusable;
+import com.yang.SQLExecutor.util.stringUtils.test.newStructure.StringBuilderAdapter;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.IntStream;
 
-import static com.yang.SQLExecutor.util.stringUtils.test.StringBuilderFactory.*;
-import static com.yang.SQLExecutor.util.stringUtils.test.newStructure.DynamicObjectPool.getObjs;
-import static com.yang.SQLExecutor.util.stringUtils.test.newStructure.DynamicObjectPool.use;
+import static com.yang.SQLExecutor.util.stringUtils.test.newStructure.DynamicObjectPool.*;
 
 /**
  * @auther YF
- * @create 2020-11-19-20:50
+ * @create 2020-11-21-21:19
  */
-public class StringBuilderFactoryTest {
+public class TestDynamicObjectPool {
+
 
     public static void main(String[] args) {
         test04();
     }
+
 
     public static void sleep() {
         try {
@@ -34,8 +35,8 @@ public class StringBuilderFactoryTest {
     private static void startOperation() {
         new Thread(() -> {
             System.out.println("--------------------------------------------------------" + TimeTest.testTime(() -> {
-                useBuilder(sb -> {
-                    System.out.println("size = " + getBuilders().size());
+                use((Consumer<StringBuilderAdapter>) sb -> {
+                    System.out.println("size = " + getObjs().size());
                     for (int i1 = 0; i1 < 10; i1++) {
                         sb.append(i1);
                         if (Integer.parseInt(Thread.currentThread().getName().split("-")[1]) % 3 == 0) {
@@ -79,5 +80,4 @@ public class StringBuilderFactoryTest {
             startOperation();
         }
     }
-
 }
