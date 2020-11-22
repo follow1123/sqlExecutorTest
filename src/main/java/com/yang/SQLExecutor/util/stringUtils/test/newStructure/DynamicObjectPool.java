@@ -18,8 +18,38 @@ public class DynamicObjectPool {
     //空闲对象集合
     private static LinkedList<Reusable> idleObjs = new LinkedList<>();
 
+    private volatile static String curTName;
+
+
+    private volatile static long curMS;
+
+    private static int minSize = 50;
+
+    public synchronized static void setCurTName() {
+        System.out.println(
+                (curTName = Thread.currentThread().getName()) +
+                        " join on " +
+                        (curMS = System.currentTimeMillis()) + " ms");
+    }
+
     public static List<Reusable> getObjs() {
         return objs;
+    }
+
+    private static Thread objGC = new Thread(() -> {
+        long preMS = 0;
+        while (true) {
+            if (curMS - preMS >= 1000) {
+                System.out.println("------------------------------------------ delay ------------------------------------------");
+                System.out.println("final  ==== " + objs.size());
+            }
+            preMS = curMS;
+        }
+    });
+
+    static {
+        objGC.setDaemon(true);
+        objGC.start();
     }
 
     /**
@@ -35,10 +65,15 @@ public class DynamicObjectPool {
     /**
      * 从对象集合内筛选闲置的对象存入闲置对象集合内
      */
-    private synchronized static void getIdleObjs() {
+    private static void getIdleObjs() {
         objs.stream().filter(Reusable::isIdle).forEach(idleObjs::add);
         if (idleObjs.size() == 0) idleObjs.add(getNewBuilder());
 
+    }
+
+    public static Reusable listenerAndGet() {
+        setCurTName();
+        return get();
     }
 
     /**
@@ -46,7 +81,7 @@ public class DynamicObjectPool {
      *
      * @return
      */
-    private static Reusable get() {
+    public static Reusable get() {
         //双重检测锁判断闲置数组是否为空
         if (idleObjs.size() == 0) {
             synchronized (DynamicObjectPool.class) {
@@ -71,7 +106,7 @@ public class DynamicObjectPool {
      * @param <T>
      */
     public static <T> void use(Consumer<T> event) {
-        Reusable t = DynamicObjectPool.get();
+        Reusable t = DynamicObjectPool.listenerAndGet();
         event.accept((T) t);
         t.recycle();
     }

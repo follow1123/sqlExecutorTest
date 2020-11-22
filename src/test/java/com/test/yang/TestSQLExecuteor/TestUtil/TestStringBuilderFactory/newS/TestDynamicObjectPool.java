@@ -1,13 +1,8 @@
 package com.test.yang.TestSQLExecuteor.TestUtil.TestStringBuilderFactory.newS;
 
-import com.yang.SQLExecutor.util.TimeTest;
-import com.yang.SQLExecutor.util.stringUtils.test.newStructure.Reusable;
 import com.yang.SQLExecutor.util.stringUtils.test.newStructure.StringBuilderAdapter;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.function.Consumer;
 
 import static com.yang.SQLExecutor.util.stringUtils.test.newStructure.DynamicObjectPool.*;
@@ -20,13 +15,13 @@ public class TestDynamicObjectPool {
 
 
     public static void main(String[] args) {
-        test04();
+        test06();
     }
 
 
-    public static void sleep() {
+    public static void sleep(long m) {
         try {
-            Thread.sleep(300);
+            Thread.sleep(m);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -34,18 +29,16 @@ public class TestDynamicObjectPool {
 
     private static void startOperation() {
         new Thread(() -> {
-            System.out.println("--------------------------------------------------------" + TimeTest.testTime(() -> {
-                use((Consumer<StringBuilderAdapter>) sb -> {
-                    System.out.println("size = " + getObjs().size());
-                    for (int i1 = 0; i1 < 10; i1++) {
-                        sb.append(i1);
-                        if (Integer.parseInt(Thread.currentThread().getName().split("-")[1]) % 3 == 0) {
-                            sleep();
-                        }
+            use((Consumer<StringBuilderAdapter>) sb -> {
+                System.out.println("size = " + getObjs().size());
+                for (int i1 = 0; i1 < 10; i1++) {
+                    sb.append(i1);
+                    if (Integer.parseInt(Thread.currentThread().getName().split("-")[1]) % 3 == 0) {
+                        sleep(300);
                     }
-                    System.out.println(sb.hashCode() + "====" + Thread.currentThread().getName() + "====" + sb);
-                });
-            }));
+                }
+                System.out.println("0123456789".equals(sb.toString()));
+            });
         }).start();
     }
 
@@ -78,6 +71,48 @@ public class TestDynamicObjectPool {
     public static void test04() {
         for (int i = 0; i < 10; i++) {
             startOperation();
+        }
+    }
+
+    @Test
+    public void testOther() {
+        Thread thread = new Thread();
+        System.out.println(thread.getState());
+    }
+
+    public static void test05() {
+
+        new Thread(() -> {
+            StringBuilderAdapter sb = (StringBuilderAdapter) listenerAndGet();
+            sb.append(Thread.currentThread().getName() + " 执行操作！");
+            System.out.println(sb);
+            sb.recycle();
+        }).start();
+
+        sleep(6000);
+        new Thread(() -> {
+            StringBuilderAdapter sb = (StringBuilderAdapter) listenerAndGet();
+            sb.append(Thread.currentThread().getName() + " 执行操作！");
+            System.out.println(sb);
+            sb.recycle();
+        }).start();
+
+    }
+
+    public static void test06() {
+        for (int i = 0; i < 100; i++) {
+            new Thread(() -> {
+                if (Integer.parseInt(Thread.currentThread().getName().split("-")[1]) % 3 == 0) {
+                    sleep(5500);
+                }
+                use((Consumer<StringBuilderAdapter>) sb -> {
+                    System.out.println("size = " + getObjs().size());
+                    for (int i1 = 0; i1 < 10; i1++) {
+                        sb.append(i1);
+                    }
+//                    System.out.println("0123456789".equals(sb.toString()));
+                });
+            }).start();
         }
     }
 }
