@@ -4,6 +4,7 @@ package com.yang.SQLExecutor.util.stringUtils.test.newStructure;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -17,39 +18,56 @@ public class DynamicObjectPool {
     private static Reusable temp;
     //空闲对象集合
     private static LinkedList<Reusable> idleObjs = new LinkedList<>();
-
-    private volatile static String curTName;
-
-
-    private volatile static long curMS;
-
+    //每个线程进入时的毫秒数
+    private volatile static long curNanoSecond;
+    //对象集合默认的最小size
     private static int minSize = 50;
+    //守护线程实例
+    private static Thread objGC = new Thread(DynamicObjectPool::sizeListener);
 
-    public synchronized static void setCurTName() {
-        System.out.println(
-                (curTName = Thread.currentThread().getName()) +
-                        " join on " +
-                        (curMS = System.currentTimeMillis()) + " ms");
-    }
-
-    public static List<Reusable> getObjs() {
-        return objs;
-    }
-
-    private static Thread objGC = new Thread(() -> {
-        long preMS = 0;
-        while (true) {
-            if (curMS - preMS >= 1000) {
-                System.out.println("------------------------------------------ delay ------------------------------------------");
-                System.out.println("final  ==== " + objs.size());
-            }
-            preMS = curMS;
-        }
-    });
-
+    //开启一个守护线程
     static {
         objGC.setDaemon(true);
         objGC.start();
+    }
+
+    /**
+     * 自动清理操作
+     */
+    private static void sizeListener() {
+        long preNS = 0;
+        while (true) {
+//            System.nanoTime()
+            if ((preNS + TimeUnit.SECONDS.toNanos(2)) <= curNanoSecond) {
+                preNS = curNanoSecond;
+            }
+        }
+    }
+
+    private static void clean() throws InterruptedException {
+        int canCleanSize = objs.size() - minSize;
+        if (canCleanSize > 0) {
+            for (int i = 0; i < canCleanSize; i++) {
+                TimeUnit.SECONDS.sleep(1);
+            }
+        }
+    }
+
+    /**
+     * 标记一下每个线程进来时的毫秒数
+     */
+    public synchronized static void markNanoSecond() {
+        System.out.println(Thread.currentThread().getName() + " join on " +
+                (curNanoSecond = System.currentTimeMillis()) + " ns");
+    }
+
+    /**
+     * 获取当前对象集合的大小
+     *
+     * @return
+     */
+    public static int getSize() {
+        return objs.size();
     }
 
     /**
@@ -71,8 +89,13 @@ public class DynamicObjectPool {
 
     }
 
+    /**
+     * 监听线程并获取
+     *
+     * @return
+     */
     public static Reusable listenerAndGet() {
-        setCurTName();
+        markNanoSecond();
         return get();
     }
 

@@ -1,17 +1,8 @@
 package com.test.yang.TestSQLExecuteor.TestUtil.TestStringBuilderFactory;
 
 import com.yang.SQLExecutor.util.TimeTest;
-import com.yang.SQLExecutor.util.stringUtils.test.StringBuilderAdapter;
-import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.stream.IntStream;
 
 import static com.yang.SQLExecutor.util.stringUtils.test.StringBuilderFactory.*;
-import static com.yang.SQLExecutor.util.stringUtils.test.newStructure.DynamicObjectPool.getObjs;
-import static com.yang.SQLExecutor.util.stringUtils.test.newStructure.DynamicObjectPool.use;
 
 /**
  * @auther YF

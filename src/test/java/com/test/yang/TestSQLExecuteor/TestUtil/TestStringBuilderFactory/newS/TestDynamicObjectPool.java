@@ -3,6 +3,7 @@ package com.test.yang.TestSQLExecuteor.TestUtil.TestStringBuilderFactory.newS;
 import com.yang.SQLExecutor.util.stringUtils.test.newStructure.StringBuilderAdapter;
 import org.junit.Test;
 
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static com.yang.SQLExecutor.util.stringUtils.test.newStructure.DynamicObjectPool.*;
@@ -15,7 +16,19 @@ public class TestDynamicObjectPool {
 
 
     public static void main(String[] args) {
-        test06();
+//
+//        long start = System.nanoTime();
+//
+//        try {
+//            Thread.sleep(1);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//
+//        long end = System.nanoTime();
+//
+//        System.out.println((end - start));
+//        test06();
     }
 
 
@@ -30,7 +43,7 @@ public class TestDynamicObjectPool {
     private static void startOperation() {
         new Thread(() -> {
             use((Consumer<StringBuilderAdapter>) sb -> {
-                System.out.println("size = " + getObjs().size());
+                System.out.println("size = " + getSize());
                 for (int i1 = 0; i1 < 10; i1++) {
                     sb.append(i1);
                     if (Integer.parseInt(Thread.currentThread().getName().split("-")[1]) % 3 == 0) {
@@ -76,8 +89,13 @@ public class TestDynamicObjectPool {
 
     @Test
     public void testOther() {
-        Thread thread = new Thread();
-        System.out.println(thread.getState());
+
+//        System.out.println(System.currentTimeMillis());
+//        System.out.println(System.nanoTime());
+
+    System.out.println(TimeUnit.SECONDS.toNanos(2));
+
+
     }
 
     public static void test05() {
@@ -106,7 +124,7 @@ public class TestDynamicObjectPool {
                     sleep(5500);
                 }
                 use((Consumer<StringBuilderAdapter>) sb -> {
-                    System.out.println("size = " + getObjs().size());
+                    System.out.println("size = " + getSize());
                     for (int i1 = 0; i1 < 10; i1++) {
                         sb.append(i1);
                     }
