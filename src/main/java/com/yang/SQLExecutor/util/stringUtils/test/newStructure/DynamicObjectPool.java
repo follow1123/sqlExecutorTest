@@ -4,7 +4,6 @@ package com.yang.SQLExecutor.util.stringUtils.test.newStructure;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -13,52 +12,93 @@ import java.util.function.Consumer;
  */
 public class DynamicObjectPool {
     //StringBuilder数组
-    private static List<Reusable> objs = new ArrayList<>();
+    private static LinkedList<Reusable> objs = new LinkedList<>();
     //临时引用
     private static Reusable temp;
     //空闲对象集合
     private static LinkedList<Reusable> idleObjs = new LinkedList<>();
-    //每个线程进入时的毫秒数
-    private volatile static long curNanoSecond;
+    //守护线程的标记，标记是否可以清理
+    private static volatile boolean autoFlag = true;
     //对象集合默认的最小size
     private static int minSize = 50;
     //守护线程实例
-    private static Thread objGC = new Thread(DynamicObjectPool::sizeListener);
-
-    //开启一个守护线程
-    static {
-        objGC.setDaemon(true);
-        objGC.start();
-    }
+    private static Thread objGC = new Thread(DynamicObjectPool::listenerEvent);
 
     /**
      * 自动清理操作
      */
-    private static void sizeListener() {
-        long preNS = 0;
+    private static void listenerEvent() {
         while (true) {
-//            System.nanoTime()
-            if ((preNS + TimeUnit.SECONDS.toNanos(2)) <= curNanoSecond) {
-                preNS = curNanoSecond;
-            }
-        }
-    }
-
-    private static void clean() throws InterruptedException {
-        int canCleanSize = objs.size() - minSize;
-        if (canCleanSize > 0) {
-            for (int i = 0; i < canCleanSize; i++) {
-                TimeUnit.SECONDS.sleep(1);
+            if (autoFlag) {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    autoFlag = false;
+                    if (!autoFlag) {
+                        System.out.println("DynamicObjectPool.sizeListener::开始清理");
+                        clean();
+                    }
+                }
             }
         }
     }
 
     /**
-     * 标记一下每个线程进来时的毫秒数
+     * 开启守护线程
      */
-    public synchronized static void markNanoSecond() {
-        System.out.println(Thread.currentThread().getName() + " join on " +
-                (curNanoSecond = System.currentTimeMillis()) + " ns");
+    private static void startListener() {
+        if (objGC.getState() == Thread.State.NEW) {
+            synchronized (DynamicObjectPool.class) {
+                if (objGC.getState() == Thread.State.NEW) {
+                    System.out.println("DynamicObjectPool.startListener::开始监听");
+                    objGC.setDaemon(true);
+                    objGC.start();
+                }
+            }
+        }
+    }
+
+    /**
+     * 根据情况清理对象集合里面的对象
+     */
+    private static void clean() {
+        System.out.println("DynamicObjectPool.clean::清理前 ====> " + objs.size());
+        if (objs.size() > minSize) {
+            for (int excessSize = objs.size() - minSize; excessSize > 0; excessSize--) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    System.out.println("exception");
+                    break;
+                }
+                if (autoFlag){
+                    System.out.println("打断");
+                    break;
+                }
+                synchronized (DynamicObjectPool.class) {
+                    objs.removeFirst();
+                }
+            }
+        }
+        System.out.println("DynamicObjectPool.clean::清理后 ====> " + objs.size());
+    }
+
+    /**
+     * 从对象集合内筛选闲置的对象存入闲置对象集合内
+     */
+    private static void getIdleObjs() {
+        objs.stream().filter(Reusable::isIdle).forEach(idleObjs::add);
+        if (idleObjs.size() == 0) idleObjs.add(getNewBuilder());
+    }
+
+    /**
+     * 标记线程的进入
+     */
+    private static void markFlag() {
+        if (!autoFlag) autoFlag = true;
     }
 
     /**
@@ -81,21 +121,12 @@ public class DynamicObjectPool {
     }
 
     /**
-     * 从对象集合内筛选闲置的对象存入闲置对象集合内
-     */
-    private static void getIdleObjs() {
-        objs.stream().filter(Reusable::isIdle).forEach(idleObjs::add);
-        if (idleObjs.size() == 0) idleObjs.add(getNewBuilder());
-
-    }
-
-    /**
      * 监听线程并获取
      *
      * @return
      */
     public static Reusable listenerAndGet() {
-        markNanoSecond();
+        startListener();
         return get();
     }
 
@@ -105,6 +136,7 @@ public class DynamicObjectPool {
      * @return
      */
     public static Reusable get() {
+        markFlag();
         //双重检测锁判断闲置数组是否为空
         if (idleObjs.size() == 0) {
             synchronized (DynamicObjectPool.class) {
