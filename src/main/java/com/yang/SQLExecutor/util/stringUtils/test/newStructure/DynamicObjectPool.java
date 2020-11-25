@@ -1,33 +1,54 @@
 package com.yang.SQLExecutor.util.stringUtils.test.newStructure;
 
-
-import java.util.ArrayList;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
  * @auther YF
- * @create 2020-11-21-20:59
+ * @create 2020-11-25-21:00
  */
-public class DynamicObjectPool {
+public class DynamicObjectPool<T> {
+
     //StringBuilder数组
-    private static LinkedList<Reusable> objs = new LinkedList<>();
+    private LinkedList<Reusable> objs;
     //临时引用
-    private static Reusable temp;
+    private Reusable temp;
     //空闲对象集合
-    private static LinkedList<Reusable> idleObjs = new LinkedList<>();
+    private LinkedList<Reusable> idleObjs;
     //守护线程的标记，标记是否可以清理
-    private static volatile boolean autoFlag = true;
+    private volatile boolean autoFlag = true;
     //对象集合默认的最小size
-    private static int minSize = 50;
+    private int minSize;
     //守护线程实例
-    private static Thread objGC = new Thread(DynamicObjectPool::listenerEvent);
+    private Thread objGC;
+
+    private Constructor<T> prototypeConstructor;
+
+    private void init() {
+        objs = new LinkedList<>();
+        idleObjs = new LinkedList<>();
+        autoFlag = true;
+        objGC = new Thread(this::listenerEvent);
+    }
+
+
+    DynamicObjectPool(Class<T> prototype, int minSize) {
+        init();
+        this.minSize = minSize;
+        try {
+            this.prototypeConstructor = prototype.getConstructor();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            throw new RuntimeException("no public constructor!");
+        }
+    }
 
     /**
      * 自动清理操作
      */
-    private static void listenerEvent() {
+    private void listenerEvent() {
         while (true) {
             if (autoFlag) {
                 try {
@@ -46,24 +67,9 @@ public class DynamicObjectPool {
     }
 
     /**
-     * 开启守护线程
-     */
-    private static void startListener() {
-        if (objGC.getState() == Thread.State.NEW) {
-            synchronized (DynamicObjectPool.class) {
-                if (objGC.getState() == Thread.State.NEW) {
-                    System.out.println("DynamicObjectPool.startListener::开始监听");
-                    objGC.setDaemon(true);
-                    objGC.start();
-                }
-            }
-        }
-    }
-
-    /**
      * 根据情况清理对象集合里面的对象
      */
-    private static void clean() {
+    private void clean() {
         System.out.println("DynamicObjectPool.clean::清理前 ====> " + objs.size());
         if (objs.size() > minSize) {
             for (int excessSize = objs.size() - minSize; excessSize > 0; excessSize--) {
@@ -74,11 +80,11 @@ public class DynamicObjectPool {
                     System.out.println("exception");
                     break;
                 }
-                if (autoFlag){
+                if (autoFlag) {
                     System.out.println("打断");
                     break;
                 }
-                synchronized (DynamicObjectPool.class) {
+                synchronized (this) {
                     objs.removeFirst();
                 }
             }
@@ -89,7 +95,7 @@ public class DynamicObjectPool {
     /**
      * 从对象集合内筛选闲置的对象存入闲置对象集合内
      */
-    private static void getIdleObjs() {
+    private void getIdleObjs() {
         objs.stream().filter(Reusable::isIdle).forEach(idleObjs::add);
         if (idleObjs.size() == 0) idleObjs.add(getNewBuilder());
     }
@@ -97,8 +103,23 @@ public class DynamicObjectPool {
     /**
      * 标记线程的进入
      */
-    private static void markFlag() {
+    private void mark() {
         if (!autoFlag) autoFlag = true;
+    }
+
+    /**
+     * 开启守护线程
+     */
+    private void startListener() {
+        if (objGC.getState() == Thread.State.NEW) {
+            synchronized (this) {
+                if (objGC.getState() == Thread.State.NEW) {
+                    System.out.println("DynamicObjectPool.startListener::开始监听");
+                    objGC.setDaemon(true);
+                    objGC.start();
+                }
+            }
+        }
     }
 
     /**
@@ -106,7 +127,7 @@ public class DynamicObjectPool {
      *
      * @return
      */
-    public static int getSize() {
+    public int getSize() {
         return objs.size();
     }
 
@@ -115,8 +136,15 @@ public class DynamicObjectPool {
      *
      * @return
      */
-    public static Reusable getNewBuilder() {
-        objs.add(temp = new StringBuilderAdapter());
+    public Reusable getNewBuilder(){
+        try {
+            objs.add(temp = (Reusable) prototypeConstructor.newInstance());
+        }catch (ClassCastException e){
+            e.printStackTrace();
+            throw new RuntimeException("please implement a interface 'Reusable'");
+        } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
         return temp;
     }
 
@@ -125,7 +153,7 @@ public class DynamicObjectPool {
      *
      * @return
      */
-    public static Reusable listenerAndGet() {
+    public T listenerAndGet() {
         startListener();
         return get();
     }
@@ -135,20 +163,20 @@ public class DynamicObjectPool {
      *
      * @return
      */
-    public static Reusable get() {
-        markFlag();
+    public T get() {
+        mark();
         //双重检测锁判断闲置数组是否为空
         if (idleObjs.size() == 0) {
-            synchronized (DynamicObjectPool.class) {
+            synchronized (this) {
                 //为空则从对象数组内填充
                 if (idleObjs.size() == 0) getIdleObjs();
             }
         }
         //到这里闲置数组的大小必然大于零所以这还是一个双重检测锁
         // 判断闲置数组是否大于零
-        synchronized (DynamicObjectPool.class) {
+        synchronized (this) {
             //大于零这移除数组内的第一个元素并设置状态后返回
-            if (idleObjs.size() > 0) return idleObjs.removeFirst().setIdle(false);
+            if (idleObjs.size() > 0) return (T) idleObjs.removeFirst().setIdle(false);
         }
         //到这里说明闲置数组内的对象又被抢空了，递归将刚才的步骤执行一遍就行了
         return get();
@@ -158,11 +186,10 @@ public class DynamicObjectPool {
      * 通用操作
      *
      * @param event
-     * @param <T>
      */
-    public static <T> void use(Consumer<T> event) {
-        Reusable t = DynamicObjectPool.listenerAndGet();
-        event.accept((T) t);
-        t.recycle();
+    public void use(Consumer<T> event) {
+        T t = listenerAndGet();
+        event.accept(t);
+        ((Reusable)t).recycle();
     }
 }

@@ -1,10 +1,10 @@
 package com.test.yang.TestSQLExecuteor.TestUtil.TestStringBuilderFactory.newS;
 
+import com.yang.SQLExecutor.util.stringUtils.test.newStructure.DynamicObjectPoolBuilder;
+import com.yang.SQLExecutor.util.stringUtils.test.newStructure.DynamicObjectPool;
 import com.yang.SQLExecutor.util.stringUtils.test.newStructure.StringBuilderAdapter;
 
-import java.util.function.Consumer;
-
-import static com.yang.SQLExecutor.util.stringUtils.test.newStructure.DynamicObjectPool.*;
+//import static com.yang.SQLExecutor.util.stringUtils.test.newStructure.DynamicObjectPool.*;
 
 /**
  * @auther YF
@@ -12,8 +12,9 @@ import static com.yang.SQLExecutor.util.stringUtils.test.newStructure.DynamicObj
  */
 public class TestDynamicObjectPool02 {
 
+    private static DynamicObjectPool<StringBuilderAdapter> pool = DynamicObjectPoolBuilder.build(StringBuilderAdapter.class, 50);
 
-    private static void sleep(long ms){
+    private static void sleep(long ms) {
         try {
             Thread.sleep(ms);
         } catch (InterruptedException e) {
@@ -30,8 +31,8 @@ public class TestDynamicObjectPool02 {
 
     private static void startOperation() {
         new Thread(() -> {
-            use((Consumer<StringBuilderAdapter>) sb -> {
-//                System.out.println("size = " + getSize());
+            pool.use(sb -> {
+                System.out.println("size = " + pool.getSize());
                 for (int i1 = 0; i1 < 10; i1++) {
                     sb.append(i1);
                     if (Integer.parseInt(Thread.currentThread().getName().split("-")[1]) % 3 == 0) {
