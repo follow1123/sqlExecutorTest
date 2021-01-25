@@ -6,16 +6,31 @@ package com.yang.SQLExecutor.util.stringUtils.test.newStructure;
  */
 public class StringBuilderAdapter implements Reusable {
 
+    static final long serialVersionUID = 1_0000_0000_0000l;
+
     private boolean idle;
 
     private StringBuilder sb;
+
+    private int a, b, c;
+
+    public StringBuilderAdapter(int a, int b, int c) {
+        this();
+        this.a = a;
+        this.b = b;
+        this.c = c;
+    }
+
+    public void printDefaultParams(){
+        System.out.println(a + "==" + b + "==" + c);
+    }
 
     public StringBuilderAdapter() {
         this.sb  = new StringBuilder();
         this.idle = true;
     }
 
-    public Reusable append(Object o) {
+    public StringBuilderAdapter append(Object o) {
         sb.append(o);
         return this;
     }

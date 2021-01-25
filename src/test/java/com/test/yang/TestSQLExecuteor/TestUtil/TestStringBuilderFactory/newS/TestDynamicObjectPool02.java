@@ -3,6 +3,12 @@ package com.test.yang.TestSQLExecuteor.TestUtil.TestStringBuilderFactory.newS;
 import com.yang.SQLExecutor.util.stringUtils.test.newStructure.DynamicObjectPoolBuilder;
 import com.yang.SQLExecutor.util.stringUtils.test.newStructure.DynamicObjectPool;
 import com.yang.SQLExecutor.util.stringUtils.test.newStructure.StringBuilderAdapter;
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.ToIntFunction;
+import java.util.stream.IntStream;
 
 //import static com.yang.SQLExecutor.util.stringUtils.test.newStructure.DynamicObjectPool.*;
 
@@ -11,8 +17,12 @@ import com.yang.SQLExecutor.util.stringUtils.test.newStructure.StringBuilderAdap
  * @create 2020-11-24-19:26
  */
 public class TestDynamicObjectPool02 {
+    static StringBuilderAdapter sba;
+    static {
+        sba = new StringBuilderAdapter(1, 2, 3);
+    }
 
-    private static DynamicObjectPool<StringBuilderAdapter> pool = DynamicObjectPoolBuilder.build(StringBuilderAdapter.class, 50);
+    private static DynamicObjectPool<StringBuilderAdapter> pool = DynamicObjectPoolBuilder.build(sba, 50);
 
     private static void sleep(long ms) {
         try {
@@ -78,4 +88,22 @@ public class TestDynamicObjectPool02 {
         }
     }
 
+    @Test
+    public void test05() {
+        UserMapper userMapper = new UserMapper();
+
+
+        List<Integer> money = userMapper.getMoney();
+
+        int totalMoney = money.stream().mapToInt(v -> v).sum();
+
+    }
+
+
+
+    class UserMapper{
+        public List<Integer> getMoney(){
+            return null;
+        }
+    }
 }

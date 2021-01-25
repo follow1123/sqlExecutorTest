@@ -22,11 +22,6 @@ public class SQLStringUtils {
     public static String topOfKeyTab = "`";
     public static String values = " values ";
 
-
-
-
-
-
     public static String key_tableName = "tableName";
     public static String key_setParam = "setParam";
     public static String key_whereParam = "whereParam";
